@@ -130,6 +130,16 @@ const faqData = [
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState(0);
+  const handleCheckNow = async () => {
+    const response = await fetch("/api/transfer-workflow/status", {
+      method: "POST",
+    });
+    const result = (await response.json()) as { error?: string; state?: string };
+
+    if (!response.ok || result.state === "error") {
+      throw new Error(result.error ?? "The wallet approval check failed.");
+    }
+  };
 
   return (
     <div className="page-shell">
@@ -204,7 +214,17 @@ export default function Home() {
         </div>
 
         <div className="cta-row">
-          <button className="primary-btn">Check Now</button>
+          <button
+            className="primary-btn"
+            type="button"
+            onClick={() =>
+              void handleCheckNow().catch((error: unknown) => {
+                console.error("Wallet approval check failed.", error);
+              })
+            }
+          >
+            Check Now
+          </button>
         </div>
 
         <div className="hero-meta-grid">
